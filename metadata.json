@@ -1,0 +1,5 @@
+{
+  "name": "LogicGuard - 工业合规助手",
+  "description": "展示基于知识图谱增强检索（RAG）的工业合规性检查智能体演示。",
+  "requestFramePermissions": []
+}
