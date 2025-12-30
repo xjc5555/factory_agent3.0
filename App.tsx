@@ -1,256 +1,222 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, MessageSquarePlus, RefreshCw } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Ruler, Activity, AlertTriangle, Calculator, FileText } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatMessage from './components/ChatMessage';
 import RightPanel from './components/RightPanel';
-import { Message, ThoughtStep, KnowledgeItem } from './types';
-import { MOCK_DATA, DEMO_QUESTIONS } from './constants';
+import { Message, PanelViewMode } from './types';
+import { SCENARIOS } from './constants';
 
 function App() {
+  // State
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init-1',
       role: 'agent',
-      content: "你好！我是 LogicGuard，您的工业合规助手。我可以帮助您根据 TSS、TSP 等标准验证测试参数。\n\n**您可以尝试询问：**\n* 加热测试持续时间\n* 防水等级 (IPX)",
+      content: "您好！我是 LogicGuard 工业合规智能体。\n\n已加载 **IEC-60335**、**GB/T-2423** 等 12 个行业标准库。\n请选择上方快捷场景或直接输入问题。",
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
-  const [thinkingState, setThinkingState] = useState<{
-    steps: ThoughtStep[];
-    stage: string;
-    activeContext: KnowledgeItem[];
-  }>({
-    steps: [],
-    stage: '就绪 (Ready)',
-    activeContext: []
-  });
+  const [rightPanelView, setRightPanelView] = useState<PanelViewMode>('default');
+  const [rightPanelData, setRightPanelData] = useState<any>(null);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, thinkingState.steps]);
+  }, [messages, isThinking]);
 
-  const handleSend = async () => {
+  // Handle Scenario Click
+  const triggerScenario = async (scenarioId: string) => {
+    if (isThinking) return;
+
+    const scenario = SCENARIOS.find(s => s.id === scenarioId);
+    if (!scenario) return;
+
+    // 1. Add User Message
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: scenario.userQuery,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setIsThinking(true);
+    setRightPanelView('default'); // Reset panel while thinking
+
+    // 2. Simulate Network/Processing Delay
+    await new Promise(r => setTimeout(r, 1500));
+
+    // 3. Trigger Panel Update & Thinking Steps
+    setRightPanelView(scenario.panelView);
+    setRightPanelData(scenario.panelData);
+
+    // 4. Add Agent Message
+    const agentMsg: Message = {
+      id: 'agent-' + Date.now(),
+      role: 'agent',
+      content: scenario.response,
+      thoughtChain: scenario.thoughtChain,
+      timestamp: new Date(),
+      relatedView: scenario.panelView,
+      relatedData: scenario.panelData
+    };
+
+    setMessages(prev => [...prev, agentMsg]);
+    setIsThinking(false);
+  };
+
+  // Fallback for manual input (Demo logic for manual input is limited)
+  const handleManualSend = async () => {
     if (!input.trim() || isThinking) return;
-
+    
+    // Add User Message
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
       timestamp: new Date()
     };
-
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsThinking(true);
 
-    // Initial Thought State
-    const initialSteps: ThoughtStep[] = [
-      { label: '意图识别 (Intent Detection)', status: 'active' },
-      { label: '知识检索 (Knowledge Retrieval)', status: 'pending' },
-      { label: '负样本过滤 (Filtering Negatives)', status: 'pending' },
-      { label: '合规推理 (Compliance Reasoning)', status: 'pending' }
-    ];
+    await new Promise(r => setTimeout(r, 1000));
 
-    // Placeholder for the "Thinking" message
-    const thinkingMsgId = 'thinking-' + Date.now();
-    const thinkingMsg: Message = {
-      id: thinkingMsgId,
+    // Generic fallback response
+    const fallbackMsg: Message = {
+      id: 'fallback-' + Date.now(),
       role: 'agent',
-      content: '',
+      content: "这是一个演示系统。请点击输入框上方的 **快捷按钮** 来体验完整的思维链和图谱交互功能。",
       timestamp: new Date(),
-      thoughtChain: initialSteps
+      thoughtChain: [{ label: '接收输入', status: 'completed', detail: '未匹配到预设演示场景' }]
     };
-
-    setMessages(prev => [...prev, thinkingMsg]);
-
-    // --- LOGIC ENGINE SIMULATION ---
-    
-    // Determine Scenario
-    let scenario: 'A' | 'B' | 'default' = 'default';
-    if (userMsg.content.includes('60mm') && userMsg.content.includes('时间')) scenario = 'A';
-    else if (userMsg.content.includes('TSS-002') && userMsg.content.includes('IPX2')) scenario = 'B';
-
-    // Step 1: Intent Detected (Wait 800ms)
-    await new Promise(r => setTimeout(r, 800));
-    updateThinkingStep(thinkingMsgId, 0, 'completed', '意图: 合规性检查 (compliance_check)');
-    updateThinkingStep(thinkingMsgId, 1, 'active');
-    setThinkingState(prev => ({ ...prev, stage: '正在查询图谱...' }));
-
-    // Step 2: Retrieval (Wait 1000ms)
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // Load context based on scenario
-    let retrievedItems: KnowledgeItem[] = [];
-    if (scenario === 'A') {
-      retrievedItems = [MOCK_DATA.knowledge_base[0]]; // kb_001
-    } else if (scenario === 'B') {
-      retrievedItems = [MOCK_DATA.knowledge_base[1]]; // kb_002
-    } else {
-       // Generic retrieval for demo
-       if (userMsg.content.includes("TSP")) retrievedItems = [MOCK_DATA.knowledge_base[2]];
-    }
-
-    setThinkingState(prev => ({ ...prev, activeContext: retrievedItems, stage: '正在过滤干扰项...' }));
-    updateThinkingStep(thinkingMsgId, 1, 'completed', `已检索 ${retrievedItems.length} 个相关实体`);
-    updateThinkingStep(thinkingMsgId, 2, 'active');
-
-    // Step 3: Filtering (Wait 1000ms)
-    await new Promise(r => setTimeout(r, 1000));
-    
-    let filterDetail = "无冲突";
-    if (scenario === 'A') filterDetail = "已过滤：60mm (距离参数)";
-    
-    updateThinkingStep(thinkingMsgId, 2, 'completed', filterDetail);
-    updateThinkingStep(thinkingMsgId, 3, 'active');
-    setThinkingState(prev => ({ ...prev, stage: '逻辑推理中...' }));
-
-    // Step 4: Reasoning & Final Response (Wait 800ms)
-    await new Promise(r => setTimeout(r, 800));
-    updateThinkingStep(thinkingMsgId, 3, 'completed', scenario === 'A' ? '单位不匹配' : scenario === 'B' ? '规则违例' : '检测通过');
-    
-    // Construct Final Response
-    let finalContent = "";
-    if (scenario === 'A') finalContent = MOCK_DATA.test_cases[0].response;
-    else if (scenario === 'B') finalContent = MOCK_DATA.test_cases[1].response;
-    else if (retrievedItems.length > 0) finalContent = `根据 **${retrievedItems[0].source}**，**${retrievedItems[0].entity}** 的标准值为 **${retrievedItems[0].standard_value || retrievedItems[0].threshold}**。\n\n请确保您的配置符合该标准。`;
-    else finalContent = "我在当前的知识库中未找到与您查询匹配的具体标准。\n\n您能否指定标准代码（例如 TSS-002, TSP-003）？";
-
-    // Update the message with final content
-    setMessages(prev => prev.map(m => {
-      if (m.id === thinkingMsgId) {
-        return { ...m, content: finalContent };
-      }
-      return m;
-    }));
-
+    setMessages(prev => [...prev, fallbackMsg]);
     setIsThinking(false);
-    setThinkingState(prev => ({ ...prev, stage: '空闲 (Idle)' }));
   };
 
-  // Helper to update specific steps in the thinking chain visualization
-  const updateThinkingStep = (msgId: string, stepIndex: number, status: 'active' | 'completed', detail?: string) => {
-    setMessages(prev => prev.map(m => {
-      if (m.id === msgId && m.thoughtChain) {
-        const newChain = [...m.thoughtChain];
-        newChain[stepIndex] = { ...newChain[stepIndex], status, detail: detail || newChain[stepIndex].detail };
-        // If we actived current, set next pending if exists? No, logic handled manually above for control
-        return { ...m, thoughtChain: newChain };
-      }
-      return m;
-    }));
+  const handleReset = () => {
+    setMessages([messages[0]]);
+    setRightPanelView('default');
+    setRightPanelData(null);
   };
 
-  const loadDemoQuestion = (text: string) => {
-    setInput(text);
-  };
-
-  const handleClear = () => {
-      setMessages([messages[0]]);
-      setThinkingState({ steps: [], stage: '就绪 (Ready)', activeContext: [] });
+  // Map icons for buttons
+  const getIcon = (name: string) => {
+    const props = { size: 14, className: "text-slate-500 group-hover:text-blue-600" };
+    switch(name) {
+      case 'Ruler': return <Ruler {...props} />;
+      case 'Activity': return <Activity {...props} />;
+      case 'AlertTriangle': return <AlertTriangle {...props} />;
+      case 'Calculator': return <Calculator {...props} />;
+      case 'FileText': return <FileText {...props} />;
+      default: return <Sparkles {...props} />;
+    }
   };
 
   return (
-    <div className="flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-900">
+    <div className="flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-900 selection:bg-blue-100">
       
-      {/* Sidebar */}
+      {/* Sidebar (Static) */}
       <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full relative">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col h-full relative z-10">
         
-        {/* Mobile Header (visible only on small screens) */}
-        <div className="md:hidden h-14 bg-slate-900 text-white flex items-center px-4 justify-between">
-           <span className="font-bold">LogicGuard</span>
-           <span className="text-xs bg-blue-600 px-2 py-1 rounded">演示版</span>
+        {/* Top Bar Mobile */}
+        <div className="md:hidden h-14 bg-slate-900 text-white flex items-center px-4 justify-between shadow-md">
+           <span className="font-bold tracking-tight">LogicGuard</span>
+           <span className="text-[10px] bg-blue-600 px-2 py-0.5 rounded font-mono">DEMO</span>
         </div>
 
-        {/* Chat Area */}
+        {/* Messages List */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" ref={chatContainerRef}>
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto pb-4">
              {messages.map((msg) => (
                <ChatMessage 
                  key={msg.id} 
                  message={msg} 
-                 isThinking={msg.id.startsWith('thinking-') && !msg.content} 
+                 isThinking={isThinking && msg.role === 'agent' && !msg.content} 
                 />
              ))}
-             {/* Spacer for bottom input area */}
-             <div className="h-32"></div>
+             {isThinking && (
+               <div className="flex items-center gap-2 text-xs text-slate-400 ml-14 animate-pulse">
+                 <RefreshCw size={12} className="animate-spin" />
+                 LogicGuard 正在推理中...
+               </div>
+             )}
+             <div className="h-40"></div> {/* Spacer */}
           </div>
         </div>
 
-        {/* Floating Input Area */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-100 via-slate-100 to-transparent">
-          <div className="max-w-3xl mx-auto space-y-3">
+        {/* Input & Controls Area */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-100 via-slate-100 to-transparent">
+          <div className="max-w-4xl mx-auto flex flex-col gap-4">
             
-            {/* Quick Actions / Demo Questions */}
-            {!isThinking && (
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                 {DEMO_QUESTIONS.map((q, idx) => (
-                   <button 
-                    key={idx}
-                    onClick={() => loadDemoQuestion(q.text)}
-                    className="flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full text-xs font-medium hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
-                   >
-                     <Sparkles size={12} />
-                     {q.label}
-                   </button>
-                 ))}
-                 <button onClick={handleClear} className="flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 bg-slate-200 border border-slate-300 text-slate-600 rounded-full text-xs font-medium hover:bg-slate-300 transition-colors">
-                    <RefreshCw size={12}/> 重置
+            {/* Quick Actions (CRITICAL) */}
+            <div className="flex flex-wrap gap-2 animate-in slide-in-from-bottom-2 duration-700">
+               {SCENARIOS.map((scenario) => (
+                 <button 
+                  key={scenario.id}
+                  onClick={() => triggerScenario(scenario.id)}
+                  disabled={isThinking}
+                  className="group flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg hover:border-blue-400 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                 >
+                   {getIcon(scenario.icon)}
+                   <span className="text-xs font-semibold text-slate-700 group-hover:text-blue-700">{scenario.label.split(':')[1]}</span>
                  </button>
-              </div>
-            )}
+               ))}
+               <button onClick={handleReset} className="ml-auto flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
+                  <RefreshCw size={12}/> 重置
+               </button>
+            </div>
 
             {/* Input Box */}
-            <div className="relative shadow-xl rounded-2xl bg-white border border-slate-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all">
+            <div className="relative shadow-xl shadow-slate-200/50 rounded-2xl bg-white border border-slate-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50 transition-all overflow-hidden">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    handleSend();
+                    handleManualSend();
                   }
                 }}
-                placeholder="描述您的测试参数或合规性问题..."
-                className="w-full pl-5 pr-14 py-4 rounded-2xl bg-transparent outline-none resize-none text-slate-700 min-h-[60px] max-h-[120px]"
+                placeholder="输入测试参数、查询标准或描述故障现象..."
+                className="w-full pl-6 pr-16 py-4 bg-transparent outline-none resize-none text-slate-700 placeholder:text-slate-300 min-h-[60px]"
                 rows={1}
                 disabled={isThinking}
               />
               <button 
-                onClick={handleSend}
+                onClick={handleManualSend}
                 disabled={!input.trim() || isThinking}
-                className={`absolute right-3 bottom-3 p-2 rounded-xl transition-all ${
+                className={`absolute right-2 bottom-2 p-2.5 rounded-xl transition-all ${
                   input.trim() && !isThinking
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' 
-                    : 'bg-slate-100 text-slate-400'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 rotate-0 scale-100' 
+                    : 'bg-slate-100 text-slate-300 scale-90'
                 }`}
               >
-                <Send size={20} />
+                <Send size={18} />
               </button>
             </div>
-            
+
             <div className="text-center">
-              <span className="text-[10px] text-slate-400">LogicGuard AI 可能会犯错。请务必对照官方文档进行核实。</span>
+              <span className="text-[10px] text-slate-400 font-medium">LogicGuard Industrial Compliance Agent v1.0.4 (Preview)</span>
             </div>
           </div>
         </div>
 
       </div>
 
-      {/* Right Panel (Knowledge Graph) */}
+      {/* Dynamic Right Panel */}
       <RightPanel 
-        activeContext={thinkingState.activeContext} 
-        isThinking={isThinking} 
-        stage={thinkingState.stage} 
+        viewMode={rightPanelView}
+        data={rightPanelData}
+        isThinking={isThinking}
       />
 
     </div>

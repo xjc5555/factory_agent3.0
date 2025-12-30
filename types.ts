@@ -1,3 +1,5 @@
+export type PanelViewMode = 'default' | 'graph' | 'doc' | 'dashboard';
+
 export interface KnowledgeItem {
   id: string;
   entity: string;
@@ -23,17 +25,21 @@ export interface Message {
   content: string;
   timestamp: Date;
   thoughtChain?: ThoughtStep[];
+  relatedView?: PanelViewMode; // Trigger a specific view when this message is active
+  relatedData?: any; // Data payload for the right panel
 }
 
-export interface TestCase {
-  case_id: number;
-  user_query: string;
-  intent: string;
-  thought_chain: string[];
+export interface Scenario {
+  id: string;
+  label: string;
+  icon: string;
+  userQuery: string;
+  panelView: PanelViewMode;
+  panelData: any; // Flexible payload for graph/doc/dashboard
+  thoughtChain: ThoughtStep[];
   response: string;
 }
 
 export interface MockDatabase {
-  knowledge_base: KnowledgeItem[];
-  test_cases: TestCase[];
+  scenarios: Scenario[];
 }
