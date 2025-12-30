@@ -1,16 +1,22 @@
+export type PageMode = 'agent' | 'kb' | 'audit';
 export type PanelViewMode = 'default' | 'graph' | 'doc' | 'dashboard';
 
 export interface KnowledgeItem {
   id: string;
-  entity: string;
-  standard_value?: string;
-  threshold?: number;
-  unit?: string;
-  condition?: string;
-  source: string;
-  hard_negative?: string;
-  attribute?: string;
-  description?: string;
+  code: string;
+  name: string;
+  category: string;
+  updated: string;
+  status: 'active' | 'deprecated';
+}
+
+export interface AuditLog {
+  id: string;
+  time: string;
+  user: string;
+  action: string;
+  result: 'Pass' | 'Fail' | 'Warning' | 'Info';
+  detail: string;
 }
 
 export interface ThoughtStep {
@@ -25,8 +31,8 @@ export interface Message {
   content: string;
   timestamp: Date;
   thoughtChain?: ThoughtStep[];
-  relatedView?: PanelViewMode; // Trigger a specific view when this message is active
-  relatedData?: any; // Data payload for the right panel
+  relatedView?: PanelViewMode;
+  relatedData?: any;
 }
 
 export interface Scenario {
@@ -35,11 +41,13 @@ export interface Scenario {
   icon: string;
   userQuery: string;
   panelView: PanelViewMode;
-  panelData: any; // Flexible payload for graph/doc/dashboard
+  panelData: any; // Flexible payload
   thoughtChain: ThoughtStep[];
   response: string;
 }
 
 export interface MockDatabase {
   scenarios: Scenario[];
+  knowledgeBase: KnowledgeItem[];
+  auditLogs: AuditLog[];
 }
