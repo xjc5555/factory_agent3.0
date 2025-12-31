@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, RefreshCw, Ruler, Activity, AlertTriangle, Calculator, FileText, Search, Filter, MoreHorizontal, Download } from 'lucide-react';
+import { Send, RefreshCw, Ruler, Activity, AlertTriangle, Calculator, FileText, Search, Filter, MoreHorizontal, Download, Server, Cpu, Database, Sliders, Check, Shield } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatMessage from './components/ChatMessage';
 import RightPanel from './components/RightPanel';
@@ -15,7 +15,7 @@ function App() {
     {
       id: 'init-1',
       role: 'agent',
-      content: "您好！我是 LogicGuard 工业合规智能体。\n\n已连接 **ERP, PLM, MES** 系统。\n您可以询问标准查询、合规检测、故障分析或风险评估相关问题。",
+      content: "系统上线。LogicGuard 工业合规引擎已就绪。\n\n当前接入知识库版本: **v2024.10.05**\n已连接传感器数据流: **24/24** 节点在线。\n\n请选择测试场景或直接输入指令。",
       timestamp: new Date()
     }
   ]);
@@ -83,7 +83,7 @@ function App() {
   };
 
   const getIcon = (name: string) => {
-    const p = { size: 14, className: "text-slate-500 group-hover:text-blue-600 transition-colors" };
+    const p = { size: 14, className: "text-slate-400 group-hover:text-blue-400 transition-colors" };
     switch(name) {
       case 'Ruler': return <Ruler {...p} />;
       case 'Activity': return <Activity {...p} />;
@@ -98,17 +98,17 @@ function App() {
 
   // 1. Agent View
   const AgentView = () => (
-    <div className="flex h-full overflow-hidden">
-      <div className="flex-1 flex flex-col relative z-10 bg-slate-50/30">
+    <div className="flex h-full overflow-hidden bg-slate-950">
+      <div className="flex-1 flex flex-col relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 to-slate-950">
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto p-6 scroll-smooth" ref={chatContainerRef}>
-          <div className="max-w-3xl mx-auto pb-6">
+          <div className="max-w-4xl mx-auto pb-6">
              {messages.map((msg) => (
                <ChatMessage key={msg.id} message={msg} isThinking={isThinking && msg.role === 'agent' && !msg.content} />
              ))}
              {isThinking && (
-               <div className="flex items-center gap-2 text-xs text-slate-400 ml-14 animate-pulse font-mono">
-                 <RefreshCw size={12} className="animate-spin" /> PROCESSING REASONING CHAIN...
+               <div className="flex items-center gap-2 text-xs text-blue-500 ml-14 animate-pulse font-mono tracking-widest">
+                 <RefreshCw size={12} className="animate-spin" /> AI REASONING IN PROGRESS...
                </div>
              )}
              <div className="h-48"></div> 
@@ -116,32 +116,32 @@ function App() {
         </div>
 
         {/* Input Area */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-100 via-slate-100 to-transparent">
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
+        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent backdrop-blur-[2px]">
+          <div className="max-w-4xl mx-auto flex flex-col gap-4">
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-2 animate-in slide-in-from-bottom-2 duration-500">
                {SCENARIOS.map((s) => (
                  <button key={s.id} onClick={() => triggerScenario(s.id)} disabled={isThinking}
-                  className="group flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 shadow-sm rounded-lg hover:border-blue-400 hover:shadow-md transition-all active:scale-95 disabled:opacity-50">
+                  className="group flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 shadow-lg rounded-lg hover:border-blue-500/50 hover:bg-slate-800/80 hover:shadow-blue-500/10 transition-all active:scale-95 disabled:opacity-50">
                    {getIcon(s.icon)}
-                   <span className="text-xs font-semibold text-slate-600 group-hover:text-blue-700">{s.label.split(':')[1]}</span>
+                   <span className="text-xs font-semibold text-slate-300 group-hover:text-blue-300">{s.label.split(':')[1]}</span>
                  </button>
                ))}
-               <button onClick={() => { setMessages([messages[0]]); setRightPanelView('default'); setRightPanelData(null); }} className="ml-auto text-slate-400 hover:text-slate-600 p-2"><RefreshCw size={14} /></button>
+               <button onClick={() => { setMessages([messages[0]]); setRightPanelView('default'); setRightPanelData(null); }} className="ml-auto text-slate-500 hover:text-slate-300 p-2"><RefreshCw size={14} /></button>
             </div>
 
             {/* Input */}
-            <div className="relative shadow-xl shadow-slate-200/60 rounded-xl bg-white border border-slate-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+            <div className="relative shadow-2xl rounded-xl bg-slate-900 border border-slate-700 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600/50 transition-all">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleManualSend()}
                 placeholder="Ask LogicGuard about standards, compliance, or risks..."
-                className="w-full pl-5 pr-14 py-4 bg-transparent outline-none text-slate-700 placeholder:text-slate-300"
+                className="w-full pl-5 pr-14 py-4 bg-transparent outline-none text-slate-200 placeholder:text-slate-600 font-sans"
                 disabled={isThinking}
               />
               <button onClick={handleManualSend} disabled={!input.trim() || isThinking}
-                className={`absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center rounded-lg transition-all ${input.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-slate-100 text-slate-300'}`}>
+                className={`absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center rounded-lg transition-all ${input.trim() ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'bg-slate-800 text-slate-600'}`}>
                 <Send size={18} />
               </button>
             </div>
@@ -156,33 +156,36 @@ function App() {
 
   // 2. Knowledge Base View
   const KnowledgeBaseView = () => (
-    <div className="flex-1 bg-slate-50 p-8 overflow-y-auto">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+    <div className="flex-1 bg-slate-950 p-8 overflow-y-auto">
+      <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">工业知识库 (Knowledge Base)</h2>
-            <p className="text-sm text-slate-500 mt-1">Managed Standards, Regulations, and Internal Protocols.</p>
+            <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
+              <Database className="text-blue-500" />
+              工业知识库 (KB)
+            </h2>
+            <p className="text-sm text-slate-500 mt-1 font-mono">Managed Standards, Regulations, and Internal Protocols.</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(37,99,235,0.3)]">
              <Download size={16} /> Export Catalog
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex gap-4">
+        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-sm mb-6 flex gap-4">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input placeholder="Search standards code or name..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-blue-500" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input placeholder="Search standards code or name..." className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm outline-none text-slate-200 focus:border-blue-500 transition-colors placeholder:text-slate-600" />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
             <Filter size={16} /> Filters
           </button>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
+            <thead className="bg-slate-950/50 border-b border-slate-800 text-slate-400 font-medium">
               <tr>
                 <th className="px-6 py-4">Standard Code</th>
                 <th className="px-6 py-4">Name</th>
@@ -192,20 +195,20 @@ function App() {
                 <th className="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-800">
               {MOCK_KB.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-mono font-medium text-blue-600">{item.code}</td>
-                  <td className="px-6 py-4 text-slate-800 font-medium">{item.name}</td>
-                  <td className="px-6 py-4 text-slate-500"><span className="px-2 py-1 bg-slate-100 rounded text-xs">{item.category}</span></td>
+                <tr key={item.id} className="hover:bg-slate-800/50 transition-colors group">
+                  <td className="px-6 py-4 font-mono font-medium text-blue-400 group-hover:text-blue-300">{item.code}</td>
+                  <td className="px-6 py-4 text-slate-200 font-medium">{item.name}</td>
+                  <td className="px-6 py-4 text-slate-500"><span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-400">{item.category}</span></td>
                   <td className="px-6 py-4 text-slate-500 font-mono text-xs">{item.updated}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${item.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${item.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-500 border border-slate-700'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'active' ? 'bg-emerald-500' : 'bg-slate-500'}`}></span>
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right text-slate-400 hover:text-blue-600 cursor-pointer">
+                  <td className="px-6 py-4 text-right text-slate-600 hover:text-blue-400 cursor-pointer">
                     <MoreHorizontal size={18} className="ml-auto" />
                   </td>
                 </tr>
@@ -219,47 +222,152 @@ function App() {
 
   // 3. Audit Log View
   const AuditLogView = () => (
-    <div className="flex-1 bg-slate-50 p-8 overflow-y-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="flex-1 bg-slate-950 p-8 overflow-y-auto">
+      <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-800">系统审计日志 (Audit Logs)</h2>
-          <p className="text-sm text-slate-500 mt-1">Immutable record of all agent interactions and compliance checks.</p>
+          <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
+            <Shield className="text-blue-500" />
+            系统审计日志 (Audit Logs)
+          </h2>
+          <p className="text-sm text-slate-500 mt-1 font-mono">Immutable blockchain-verified record of compliance checks.</p>
         </div>
 
         <div className="space-y-4">
           {MOCK_AUDIT.map((log) => (
-            <div key={log.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:border-blue-300 transition-all flex items-center gap-4 group">
-               <div className="w-16 text-xs font-mono text-slate-400 text-right">{log.time}</div>
-               <div className={`w-2 h-2 rounded-full shrink-0 ${log.result === 'Pass' ? 'bg-emerald-500' : log.result === 'Fail' ? 'bg-rose-500' : 'bg-amber-500'}`}></div>
+            <div key={log.id} className="bg-slate-900 p-4 rounded-lg border border-slate-800 shadow-sm hover:border-blue-500/30 transition-all flex items-center gap-4 group">
+               <div className="w-20 text-xs font-mono text-slate-500 text-right">{log.time}</div>
+               <div className={`w-2 h-2 rounded-full shrink-0 ${log.result === 'Pass' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : log.result === 'Fail' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' : 'bg-amber-500'}`}></div>
                <div className="flex-1">
                  <div className="flex items-center gap-2 mb-1">
-                   <span className="text-sm font-bold text-slate-800">{log.action}</span>
-                   <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded font-mono">{log.id}</span>
+                   <span className="text-sm font-bold text-slate-200">{log.action}</span>
+                   <span className="text-[10px] px-2 py-0.5 bg-slate-950 border border-slate-800 text-slate-500 rounded font-mono">{log.id}</span>
                  </div>
                  <div className="text-xs text-slate-500">
-                   User: <span className="text-slate-700 font-medium">{log.user}</span> • Detail: {log.detail}
+                   User: <span className="text-slate-300 font-medium">{log.user}</span> <span className="mx-1">•</span> Detail: {log.detail}
                  </div>
                </div>
-               <div className={`px-3 py-1 rounded-md text-xs font-bold uppercase ${
-                 log.result === 'Pass' ? 'bg-emerald-50 text-emerald-700' : 
-                 log.result === 'Fail' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'
+               <div className={`px-3 py-1 rounded-md text-xs font-bold uppercase border ${
+                 log.result === 'Pass' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                 log.result === 'Fail' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                }`}>
                  {log.result}
                </div>
             </div>
           ))}
-          <div className="text-center py-4 text-xs text-slate-400">End of recent logs</div>
+          <div className="text-center py-4 text-xs text-slate-600 font-mono">--- END OF RECENT LOGS ---</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 4. Settings View
+  const SettingsView = () => (
+    <div className="flex-1 bg-slate-950 p-8 overflow-y-auto">
+      <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
+            <Sliders className="text-blue-500" />
+            系统配置 (Configuration)
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">Adjust LogicGuard engine parameters and thresholds.</p>
+        </div>
+
+        <div className="space-y-6">
+          {/* Card 1: Model Config */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Cpu size={16} className="text-blue-400" /> Model Configuration
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Embedding Model</label>
+                <select className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm outline-none focus:border-blue-500">
+                  <option>LogicGuard-v2-Industrial (768d)</option>
+                  <option>BGE-Large-En-v1.5</option>
+                  <option>OpenAI-Ada-002</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">RAG Context Window</label>
+                <select className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm outline-none focus:border-blue-500">
+                  <option>16k Tokens (Standard)</option>
+                  <option>32k Tokens (Extended)</option>
+                  <option>128k Tokens (Full Doc)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Thresholds */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Activity size={16} className="text-emerald-400" /> Compliance Thresholds
+            </h3>
+            <div className="space-y-6">
+              <div>
+                 <div className="flex justify-between mb-2">
+                   <label className="text-xs font-medium text-slate-400">Similarity Threshold (Retrieval)</label>
+                   <span className="text-xs font-mono text-blue-400">0.78</span>
+                 </div>
+                 <input type="range" className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full" min="0" max="1" step="0.01" defaultValue="0.78" />
+              </div>
+              <div>
+                 <div className="flex justify-between mb-2">
+                   <label className="text-xs font-medium text-slate-400">Risk Alert Sensitivity</label>
+                   <span className="text-xs font-mono text-rose-400">High</span>
+                 </div>
+                 <input type="range" className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-rose-500 [&::-webkit-slider-thumb]:rounded-full" min="0" max="100" defaultValue="80" />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Status */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Server size={16} className="text-slate-400" /> System Status
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+               <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                 <span className="text-xs text-slate-400">Vector DB</span>
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                   <span className="text-[10px] text-emerald-500 font-bold">ONLINE</span>
+                 </div>
+               </div>
+               <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                 <span className="text-xs text-slate-400">Knowledge Graph</span>
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                   <span className="text-[10px] text-emerald-500 font-bold">ONLINE</span>
+                 </div>
+               </div>
+               <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                 <span className="text-xs text-slate-400">ERP Connection</span>
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                   <span className="text-[10px] text-amber-500 font-bold">SYNCING</span>
+                 </div>
+               </div>
+               <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                 <span className="text-xs text-slate-400">API Gateway</span>
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                   <span className="text-[10px] text-emerald-500 font-bold">ONLINE</span>
+                 </div>
+               </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-screen bg-slate-100 font-sans text-slate-900 selection:bg-blue-100">
+    <div className="flex h-screen bg-slate-950 font-sans text-slate-200 selection:bg-blue-500/30">
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
       <div className="flex-1 flex flex-col h-full relative overflow-hidden">
          {/* Mobile Header */}
-         <div className="md:hidden h-14 bg-slate-900 text-white flex items-center px-4 justify-between shrink-0">
+         <div className="md:hidden h-14 bg-slate-900 text-white flex items-center px-4 justify-between shrink-0 border-b border-slate-800">
            <span className="font-bold">LogicGuard</span>
            <span className="text-[10px] bg-blue-600 px-2 py-0.5 rounded">MENU</span>
         </div>
@@ -268,6 +376,7 @@ function App() {
         {activePage === 'agent' && <AgentView />}
         {activePage === 'kb' && <KnowledgeBaseView />}
         {activePage === 'audit' && <AuditLogView />}
+        {activePage === 'settings' && <SettingsView />}
       </div>
     </div>
   );

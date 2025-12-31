@@ -1,4 +1,4 @@
-export type PageMode = 'agent' | 'kb' | 'audit';
+export type PageMode = 'agent' | 'kb' | 'audit' | 'settings';
 export type PanelViewMode = 'default' | 'graph' | 'doc' | 'dashboard';
 
 export interface KnowledgeItem {
