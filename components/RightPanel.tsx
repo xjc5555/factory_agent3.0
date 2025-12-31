@@ -18,7 +18,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
           <div className="relative w-full max-w-[280px] h-[300px] flex flex-col items-center justify-center">
             {/* Center Node */}
             <div className="z-10 w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center text-center shadow-[0_0_20px_rgba(30,41,59,0.5)]">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Entity</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">实体</span>
               <span className="text-sm font-bold text-slate-200">持续时间</span>
             </div>
 
@@ -33,7 +33,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
                    <span className="text-xs font-bold text-emerald-400 font-mono">60s</span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase">
-                  <CheckCircle size={10} /> Standard
+                  <CheckCircle size={10} /> 标准
                 </div>
               </div>
 
@@ -46,13 +46,13 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
                    </div>
                  </div>
                  <div className="flex items-center gap-1 text-[10px] font-bold text-rose-500 uppercase">
-                  <AlertTriangle size={10} /> Conflict
+                  <AlertTriangle size={10} /> 冲突
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-8 p-3 rounded bg-slate-800/50 border border-slate-700 text-xs text-slate-400 font-mono text-center w-full">
-             <span className="text-rose-400">ERROR:</span> Dimension Mismatch (Length vs Time)
+             <span className="text-rose-400">错误:</span> 维度不匹配 (长度 vs 时间)
           </div>
         </div>
       );
@@ -138,7 +138,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
            </div>
 
            <div className="w-full bg-slate-800/50 rounded-lg p-4 text-xs text-center border border-slate-700/50">
-             <span className="text-slate-500 mr-2">Limit Threshold:</span> 
+             <span className="text-slate-500 mr-2">限制阈值:</span> 
              <span className="font-mono font-bold text-slate-300">≤ {data.limit} {data.unit}</span>
            </div>
         </div>
@@ -156,14 +156,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
              <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">{data.metric}</div>
              <div className="text-6xl font-black text-emerald-500 font-mono tracking-tighter drop-shadow-lg">{data.value}%</div>
              <div className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded uppercase">
-               Status: {data.status}
+               状态: {data.status}
              </div>
            </div>
 
            <div className="space-y-2">
              <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase font-mono">
                <span>0%</span>
-               <span>Limit: {data.limit}%</span>
+               <span>限值: {data.limit}%</span>
                <span>100%</span>
              </div>
              <div className="h-8 bg-slate-800 rounded-sm overflow-hidden border border-slate-700 relative">
@@ -182,7 +182,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
            {data.formula && (
              <div className="bg-slate-900 p-4 rounded-lg text-slate-400 font-mono text-[10px] border-l-2 border-emerald-500 shadow-inner">
                <div className="text-emerald-500/70 uppercase font-bold mb-1 flex items-center gap-2">
-                 <Search size={10} /> Calculation Logic
+                 <Search size={10} /> 计算逻辑
                </div>
                {data.formula}
              </div>
@@ -205,7 +205,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
            <div className="flex justify-between items-start">
              <div>
                 <h3 className="font-bold text-lg text-slate-100 leading-tight">{data.title}</h3>
-                <div className="text-[10px] text-slate-500 font-sans mt-1 uppercase tracking-wider">Classification: CONFIDENTIAL / INTERNAL</div>
+                <div className="text-[10px] text-slate-500 font-sans mt-1 uppercase tracking-wider">密级：机密 / 内部资料</div>
              </div>
              <FileText size={24} className="text-slate-600" />
            </div>
@@ -225,8 +225,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
 
          {/* Footer signature */}
          <div className="mt-8 pt-4 border-t border-slate-800 text-[10px] text-slate-600 font-sans flex justify-between relative z-10">
-           <span>DOC-ID: 2024-ENG-089</span>
-           <span>Page 1 of 4</span>
+           <span>文档ID: 2024-ENG-089</span>
+           <span>第 1 页 / 共 4 页</span>
          </div>
        </div>
     </div>
@@ -238,7 +238,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
        return (
          <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4">
            <Search size={48} className="animate-pulse opacity-20" />
-           <p className="text-xs font-mono uppercase tracking-widest animate-pulse text-blue-500/50">Retrieving Intelligence...</p>
+           <p className="text-xs font-mono uppercase tracking-widest animate-pulse text-blue-500/50">正在检索智能情报...</p>
          </div>
        );
     }
@@ -249,7 +249,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
            <div className="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700">
              <Brain size={48} className="text-slate-600" />
            </div>
-           <p className="text-xs font-mono tracking-widest">SYSTEM READY / AWAITING INPUT</p>
+           <p className="text-xs font-mono tracking-widest">系统就绪 / 等待输入</p>
         </div>
       );
     }
@@ -264,10 +264,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
 
   const getHeaderInfo = () => {
     switch (viewMode) {
-      case 'graph': return { title: 'Knowledge Graph Visualization', icon: <Share2 size={14} className="text-blue-500" /> };
-      case 'doc': return { title: 'Retrieved Document Source', icon: <FileText size={14} className="text-amber-500" /> };
-      case 'dashboard': return { title: 'Real-time Compliance Dashboard', icon: <Activity size={14} className="text-emerald-500" /> };
-      default: return { title: 'Intelligent Analysis Panel', icon: <Brain size={14} className="text-indigo-500" /> };
+      case 'graph': return { title: '知识图谱可视化', icon: <Share2 size={14} className="text-blue-500" /> };
+      case 'doc': return { title: '检索到的文档源', icon: <FileText size={14} className="text-amber-500" /> };
+      case 'dashboard': return { title: '实时合规仪表盘', icon: <Activity size={14} className="text-emerald-500" /> };
+      default: return { title: '智能分析面板', icon: <Brain size={14} className="text-indigo-500" /> };
     }
   };
 
@@ -297,8 +297,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
       
       {/* Footer Info */}
       <div className="h-8 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-4 text-[10px] text-slate-600 font-mono">
-         <span>LATENCY: 14ms</span>
-         <span>SECURE CONNECTION</span>
+         <span>网络延迟: 14ms</span>
+         <span>安全连接</span>
       </div>
     </div>
   );

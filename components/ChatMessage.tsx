@@ -38,7 +38,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isThinking }) => {
         <div className="flex flex-col gap-2 min-w-[300px]">
           {/* User Name */}
           <span className={`text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-widest ${isUser ? 'text-right' : 'text-left'}`}>
-            {isUser ? 'Engineer_01' : 'LogicGuard_Core'}
+            {isUser ? '工程师_01' : 'LogicGuard_核心'}
           </span>
 
           {/* Thought Process (Accordion Style - Dark Mode) */}
@@ -54,7 +54,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isThinking }) => {
                   ) : (
                     <Cpu size={14} className="text-blue-500" />
                   )}
-                  COT_REASONING_TRACE
+                  思维链推理轨迹
                 </div>
                 {isExpanded ? <ChevronDown size={14} className="text-slate-600"/> : <ChevronRight size={14} className="text-slate-600"/>}
               </button>

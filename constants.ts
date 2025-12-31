@@ -30,7 +30,7 @@ export const SCENARIOS: Scenario[] = [
     panelView: 'dashboard',
     panelData: {
       type: 'gauge',
-      metric: '振动加速度 (Vibration)',
+      metric: '振动加速度',
       value: 2.8,
       limit: 2.5,
       unit: 'm/s²',
@@ -80,7 +80,7 @@ export const SCENARIOS: Scenario[] = [
     panelView: 'dashboard',
     panelData: {
       type: 'progress',
-      metric: '收尘效率 (Dust Collection)',
+      metric: '收尘效率',
       value: 96.0,
       limit: 95.0,
       unit: '%',
@@ -118,20 +118,20 @@ export const SCENARIOS: Scenario[] = [
 ];
 
 export const MOCK_KB: KnowledgeItem[] = [
-  { id: 'KB-001', code: 'TSS-002', name: '防水等级测试规范', category: 'Testing', updated: '2023-10-12', status: 'active' },
-  { id: 'KB-002', code: 'TSP-003', name: '电机振动性能评价', category: 'Performance', updated: '2024-01-05', status: 'active' },
-  { id: 'KB-003', code: 'IEC-60335', name: '家用电器安全通用要求', category: 'Safety', updated: '2023-05-20', status: 'active' },
-  { id: 'KB-004', code: 'GB/T-2423', name: '电工电子环境试验', category: 'Testing', updated: '2022-11-15', status: 'active' },
-  { id: 'KB-005', code: 'FMEA-BAT', name: '动力电池失效模式库', category: 'Risk', updated: '2024-02-10', status: 'active' },
-  { id: 'KB-006', code: 'STD-HEAT', name: '加热组件测试标准 V2', category: 'Testing', updated: '2023-08-30', status: 'deprecated' },
+  { id: 'KB-001', code: 'TSS-002', name: '防水等级测试规范', category: '测试标准', updated: '2023-10-12', status: 'active' },
+  { id: 'KB-002', code: 'TSP-003', name: '电机振动性能评价', category: '性能指标', updated: '2024-01-05', status: 'active' },
+  { id: 'KB-003', code: 'IEC-60335', name: '家用电器安全通用要求', category: '安全规范', updated: '2023-05-20', status: 'active' },
+  { id: 'KB-004', code: 'GB/T-2423', name: '电工电子环境试验', category: '测试标准', updated: '2022-11-15', status: 'active' },
+  { id: 'KB-005', code: 'FMEA-BAT', name: '动力电池失效模式库', category: '风险管理', updated: '2024-02-10', status: 'active' },
+  { id: 'KB-006', code: 'STD-HEAT', name: '加热组件测试标准 V2', category: '测试标准', updated: '2023-08-30', status: 'deprecated' },
 ];
 
 export const MOCK_AUDIT: AuditLog[] = [
-  { id: 'LOG-992', time: '10:42:15', user: 'Engineer_Wang', action: 'Compliance Check (TSS-002)', result: 'Fail', detail: 'IPX2 < IPX4' },
-  { id: 'LOG-991', time: '10:38:00', user: 'Engineer_Wang', action: 'Query Knowledge (Vibration)', result: 'Info', detail: 'Retrieved TSP-003' },
-  { id: 'LOG-990', time: '09:15:22', user: 'Manager_Li', action: 'Risk Assessment (Seal)', result: 'Warning', detail: 'Tolerance Change' },
-  { id: 'LOG-989', time: '09:10:05', user: 'Manager_Li', action: 'Calculation (Dust)', result: 'Pass', detail: 'Eff: 96%' },
-  { id: 'LOG-988', time: '08:55:10', user: 'System', action: 'Daily Self-Check', result: 'Pass', detail: 'All models online' },
+  { id: 'LOG-992', time: '10:42:15', user: '工程师_王', action: '合规性检查 (TSS-002)', result: 'Fail', detail: 'IPX2 < IPX4' },
+  { id: 'LOG-991', time: '10:38:00', user: '工程师_王', action: '知识查询 (振动)', result: 'Info', detail: '检索到 TSP-003' },
+  { id: 'LOG-990', time: '09:15:22', user: '经理_李', action: '风险评估 (密封)', result: 'Warning', detail: '公差变更风险' },
+  { id: 'LOG-989', time: '09:10:05', user: '经理_李', action: '数值计算 (收尘)', result: 'Pass', detail: '效率: 96%' },
+  { id: 'LOG-988', time: '08:55:10', user: '系统', action: '每日自检', result: 'Pass', detail: '所有模型在线' },
 ];
 
 export const MOCK_DATABASE: MockDatabase = {

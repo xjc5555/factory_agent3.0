@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-4 px-3 mt-2">Main Menu</div>
+        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-4 px-3 mt-2">主菜单</div>
         
         <SidebarItem 
           icon={<Brain size={18} />} 
@@ -53,22 +53,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
 
       {/* Footer / Settings */}
       <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-3 px-3">System Metrics</div>
+        <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-3 px-3">系统指标</div>
         
         <div className="mt-2 p-3 bg-slate-900 rounded-lg border border-slate-800">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-               KG-Engine
+               知识引擎
             </span>
-            <span className="text-[10px] text-emerald-400 font-mono">ONLINE</span>
+            <span className="text-[10px] text-emerald-400 font-mono">在线</span>
           </div>
           <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
              <div className="bg-blue-600 h-full w-[85%]"></div>
           </div>
           <div className="mt-1 flex justify-between text-[8px] text-slate-600 font-mono">
-             <span>MEM: 14.2GB</span>
-             <span>LAT: 24ms</span>
+             <span>内存: 14.2GB</span>
+             <span>延迟: 24ms</span>
           </div>
         </div>
       </div>
