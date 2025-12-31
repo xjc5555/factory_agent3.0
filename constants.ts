@@ -27,9 +27,8 @@ export const SCENARIOS: Scenario[] = [
     label: '场景2: 振动超标',
     icon: 'Activity',
     userQuery: '当前电机振动测试值为 2.8 m/s²，是否满足 TSP-003 标准？',
-    panelView: 'dashboard',
+    panelView: 'dashboard-fail',
     panelData: {
-      type: 'gauge',
       metric: '振动加速度',
       value: 2.8,
       limit: 2.5,
@@ -77,9 +76,8 @@ export const SCENARIOS: Scenario[] = [
     label: '场景4: 收尘计算',
     icon: 'Calculator',
     userQuery: '测试投入粉尘 200g，残留 8g，请计算收尘率并判断是否合格。',
-    panelView: 'dashboard',
+    panelView: 'dashboard-pass',
     panelData: {
-      type: 'progress',
       metric: '收尘效率',
       value: 96.0,
       limit: 95.0,
