@@ -89,57 +89,79 @@ const RightPanel: React.FC<RightPanelProps> = ({ viewMode, data, isThinking }) =
 
   // --- View 2: Dashboard (Gauge & Progress) ---
   const DashboardView = ({ data }: { data: any }) => {
-    // Scenario 2: Gauge (Vibration) - Using SVG
+    // Scenario 2: Gauge (Vibration) - Enhanced CSS Conic Gradient
     if (data.type === 'gauge') {
-      const radius = 80;
-      const stroke = 12;
-      const normalizedValue = Math.min(Math.max((data.value / (data.limit * 1.5)) * 180, 0), 180);
+      const min = 0;
+      const max = data.limit * 1.5; // Scale max to 150% of limit
+      const current = Math.min(Math.max(data.value, min), max);
+      const percentage = ((current - min) / (max - min)) * 100;
       
+      // Calculate rotation for needle (0% = -90deg, 100% = 90deg)
+      const rotation = (percentage / 100) * 180 - 90;
+
+      // Color logic
+      const isFail = data.status === 'Fail';
+
       return (
-        <div className="h-full flex flex-col items-center justify-center p-6 space-y-8">
-           <div className="relative w-[200px] h-[100px] overflow-hidden">
-              {/* SVG Gauge */}
-              <svg viewBox="0 0 200 110" className="w-full h-full">
-                {/* Background Arc */}
-                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1e293b" strokeWidth={stroke} strokeLinecap="round" />
-                {/* Active Arc (Red for Fail) */}
-                <path 
-                  d="M 20 100 A 80 80 0 0 1 180 100" 
-                  fill="none" 
-                  stroke={data.status === 'Fail' ? '#e11d48' : '#10b981'} 
-                  strokeWidth={stroke} 
-                  strokeLinecap="round"
-                  strokeDasharray={`${(normalizedValue / 180) * 251} 251`}
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-              {/* Needle */}
-              <div 
-                className="absolute bottom-0 left-1/2 w-1 h-[85px] bg-slate-200 origin-bottom transition-transform duration-1000 ease-out"
-                style={{ 
-                  transform: `translateX(-50%) rotate(${normalizedValue - 90}deg)`,
-                  boxShadow: '0 0 10px rgba(255,255,255,0.5)'
-                }}
-              ></div>
-              <div className="absolute bottom-0 left-1/2 w-4 h-4 bg-slate-900 border-2 border-slate-500 rounded-full -translate-x-1/2 translate-y-1/2 z-10"></div>
+        <div className="h-full flex flex-col items-center justify-center p-6 space-y-10">
+           
+           {/* Semi-Circle Gauge Container */}
+           <div className="relative w-[240px] h-[120px] overflow-hidden">
+              
+              {/* The Gauge Arc (Conic Gradient) */}
+              <div className="absolute top-0 left-0 w-[240px] h-[240px] rounded-full"
+                   style={{
+                     background: `conic-gradient(from 270deg at 50% 50%, 
+                        #10b981 0%, 
+                        #10b981 60%, 
+                        #f59e0b 60%, 
+                        #f59e0b 80%, 
+                        #ef4444 80%, 
+                        #ef4444 100%
+                     )`,
+                     transform: 'rotate(-90deg)'
+                   }}>
+              </div>
+
+              {/* Inner Mask (to create the arc) */}
+              <div className="absolute top-[30px] left-[30px] w-[180px] h-[180px] bg-slate-950 rounded-full z-10 flex items-center justify-center">
+                 {/* Inner decoration */}
+                 <div className="w-[140px] h-[140px] rounded-full border border-slate-800 bg-slate-900/50"></div>
+              </div>
+
+              {/* Needle Wrapper (Centered at bottom) */}
+              <div className="absolute bottom-0 left-[120px] w-0 h-0 z-20"
+                   style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  {/* The Needle */}
+                  <div className="absolute bottom-0 left-[-4px] w-[8px] h-[120px] bg-slate-200 rounded-t-full origin-bottom"
+                       style={{ 
+                         boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                         background: 'linear-gradient(to top, #cbd5e1 50%, #f43f5e 100%)' 
+                       }}>
+                  </div>
+              </div>
+              
+              {/* Gauge Pivot Point */}
+              <div className="absolute bottom-[-10px] left-[110px] w-[20px] h-[20px] bg-slate-700 border-2 border-slate-500 rounded-full z-30 shadow-lg"></div>
            </div>
 
-           <div className="text-center">
-             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{data.metric}</div>
-             <div className={`text-5xl font-black font-mono mb-3 ${data.status === 'Fail' ? 'text-rose-500' : 'text-emerald-500'}`}>
-               {data.value} <span className="text-lg text-slate-600 font-normal">{data.unit}</span>
+           <div className="text-center z-10 -mt-4">
+             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">{data.metric}</div>
+             <div className={`text-6xl font-black font-mono mb-4 tracking-tight drop-shadow-2xl ${isFail ? 'text-rose-500' : 'text-emerald-500'}`}>
+               {data.value} <span className="text-xl text-slate-600 font-normal">{data.unit}</span>
              </div>
-             <div className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-               data.status === 'Fail' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-500'
+             
+             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider shadow-lg backdrop-blur-md ${
+               isFail ? 'bg-rose-950/40 text-rose-500 border border-rose-500/30' : 'bg-emerald-950/40 text-emerald-500 border border-emerald-500/30'
              }`}>
-               {data.status === 'Fail' ? <XCircle size={14} /> : <CheckCircle size={14} />} 
-               {data.status}
+               {isFail ? <XCircle size={16} /> : <CheckCircle size={16} />} 
+               {data.status === 'Fail' ? '不合格 (FAIL)' : '合格 (PASS)'}
              </div>
            </div>
 
-           <div className="w-full bg-slate-800/50 rounded-lg p-4 text-xs text-center border border-slate-700/50">
-             <span className="text-slate-500 mr-2">限制阈值:</span> 
-             <span className="font-mono font-bold text-slate-300">≤ {data.limit} {data.unit}</span>
+           <div className="w-full bg-slate-900 rounded-xl p-4 text-xs flex justify-between items-center border border-slate-800 shadow-inner">
+             <span className="text-slate-500">检测标准</span>
+             <span className="font-mono font-bold text-slate-300 bg-slate-800 px-2 py-1 rounded">TSP-003 ≤ {data.limit} {data.unit}</span>
            </div>
         </div>
       );

@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, RefreshCw, Ruler, Activity, AlertTriangle, Calculator, FileText, Search, Filter, MoreHorizontal, Download, Server, Cpu, Database, Sliders, Check, Shield } from 'lucide-react';
+import { Send, RefreshCw, Ruler, Activity, AlertTriangle, Calculator, FileText, Search, Filter, MoreHorizontal, Download, Server, Cpu, Database, Sliders, Check, Shield, RotateCcw } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatMessage from './components/ChatMessage';
 import RightPanel from './components/RightPanel';
-import { Message, PanelViewMode, PageMode } from './types';
+import { Message, PanelViewMode, PageMode, AuditLog } from './types';
 import { SCENARIOS, MOCK_KB, MOCK_AUDIT } from './constants';
 
 function App() {
   // --- Global State ---
   const [activePage, setActivePage] = useState<PageMode>('agent');
+  
+  // --- Lifted Audit State (For Live Updates) ---
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(MOCK_AUDIT);
 
   // --- Agent State ---
   const [messages, setMessages] = useState<Message[]>([
@@ -30,7 +33,31 @@ function App() {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isThinking]);
+  }, [messages, isThinking, activePage]); // Add activePage dependency to scroll when switching back
+
+  // --- Helpers ---
+  const addAuditLog = (action: string, result: 'Pass' | 'Fail' | 'Warning' | 'Info', detail: string) => {
+    const newLog: AuditLog = {
+      id: `LOG-${Math.floor(Math.random() * 10000)}`,
+      time: new Date().toLocaleTimeString('en-US', { hour12: false }),
+      user: '当前会话用户',
+      action,
+      result,
+      detail
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  const handleReset = () => {
+    setMessages([{
+      id: 'init-reset',
+      role: 'agent',
+      content: "会话已重置。等待新的指令...",
+      timestamp: new Date()
+    }]);
+    setRightPanelView('default');
+    setRightPanelData(null);
+  };
 
   // --- Agent Logic ---
   const triggerScenario = async (scenarioId: string) => {
@@ -51,7 +78,16 @@ function App() {
     // 2. Simulate Delay
     await new Promise(r => setTimeout(r, 1200));
 
-    // 3. Update Panel & Add Agent Message
+    // 3. Side Effects (Live Audit Logging)
+    if (scenarioId === 'case_2') {
+      addAuditLog('合规检测 (振动)', 'Fail', 'TSP-003 超标 (2.8 > 2.5)');
+    } else if (scenarioId === 'case_5') {
+      addAuditLog('风险模拟 (公差)', 'Warning', '检测到高风险变更 (IT5->IT9)');
+    } else if (scenarioId === 'case_4') {
+      addAuditLog('效率计算 (收尘)', 'Pass', '计算结果 96% 合格');
+    }
+
+    // 4. Update Panel & Add Agent Message
     setRightPanelView(scenario.panelView);
     setRightPanelData(scenario.panelData);
     setMessages(prev => [...prev, {
@@ -96,10 +132,19 @@ function App() {
 
   // --- Views ---
 
-  // 1. Agent View
-  const AgentView = () => (
+  // 1. Agent View (Extracted for cleaner render logic, but kept in file)
+  // Now simply returns the internal JSX. The Visibility is controlled by the parent.
+  const renderAgentContent = () => (
     <div className="flex h-full overflow-hidden bg-slate-950">
       <div className="flex-1 flex flex-col relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 to-slate-950">
+        
+        {/* Toolbar Overlay */}
+        <div className="absolute top-4 right-6 z-20">
+           <button onClick={handleReset} title="重置会话" className="p-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg backdrop-blur-sm border border-slate-700 transition-all">
+             <RotateCcw size={16} />
+           </button>
+        </div>
+
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto p-6 scroll-smooth" ref={chatContainerRef}>
           <div className="max-w-4xl mx-auto pb-6">
@@ -127,7 +172,6 @@ function App() {
                    <span className="text-xs font-semibold text-slate-300 group-hover:text-blue-300">{s.label.split(':')[1]}</span>
                  </button>
                ))}
-               <button onClick={() => { setMessages([messages[0]]); setRightPanelView('default'); setRightPanelData(null); }} className="ml-auto text-slate-500 hover:text-slate-300 p-2"><RefreshCw size={14} /></button>
             </div>
 
             {/* Input */}
@@ -220,7 +264,7 @@ function App() {
     </div>
   );
 
-  // 3. Audit Log View
+  // 3. Audit Log View (Using lifted state)
   const AuditLogView = () => (
     <div className="flex-1 bg-slate-950 p-8 overflow-y-auto">
       <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
@@ -233,8 +277,8 @@ function App() {
         </div>
 
         <div className="space-y-4">
-          {MOCK_AUDIT.map((log) => (
-            <div key={log.id} className="bg-slate-900 p-4 rounded-lg border border-slate-800 shadow-sm hover:border-blue-500/30 transition-all flex items-center gap-4 group">
+          {auditLogs.map((log) => (
+            <div key={log.id} className="bg-slate-900 p-4 rounded-lg border border-slate-800 shadow-sm hover:border-blue-500/30 transition-all flex items-center gap-4 group animate-in slide-in-from-top-2 duration-300">
                <div className="w-20 text-xs font-mono text-slate-500 text-right">{log.time}</div>
                <div className={`w-2 h-2 rounded-full shrink-0 ${log.result === 'Pass' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : log.result === 'Fail' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' : 'bg-amber-500'}`}></div>
                <div className="flex-1">
@@ -254,7 +298,7 @@ function App() {
                </div>
             </div>
           ))}
-          <div className="text-center py-4 text-xs text-slate-600 font-mono">--- 近期日志结束 ---</div>
+          <div className="text-center py-4 text-xs text-slate-600 font-mono">--- 实时日志监控中 ---</div>
         </div>
       </div>
     </div>
@@ -373,7 +417,13 @@ function App() {
         </div>
         
         {/* Main Content Switcher */}
-        {activePage === 'agent' && <AgentView />}
+        
+        {/* Keep Agent Alive (Use CSS display instead of conditional rendering) */}
+        <div style={{ display: activePage === 'agent' ? 'flex' : 'none' }} className="flex-1 flex flex-col h-full overflow-hidden">
+           {renderAgentContent()}
+        </div>
+
+        {/* Other Views (Conditional is fine for these) */}
         {activePage === 'kb' && <KnowledgeBaseView />}
         {activePage === 'audit' && <AuditLogView />}
         {activePage === 'settings' && <SettingsView />}
